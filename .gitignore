@@ -1,2 +1,4 @@
 *.sln 
 .vs/* 
+*.vcxproj 
+*.vcxproj.vcxproj.filters 
