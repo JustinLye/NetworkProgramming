@@ -2,3 +2,4 @@
 .vs/* 
 *.vcxproj 
 *.vcxproj.vcxproj.filters 
+*.pdb 
