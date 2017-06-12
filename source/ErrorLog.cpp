@@ -1,5 +1,4 @@
 #include"../include/ErrorLog.h"
-
 jl::Error::Error() : _message(nullptr), _lineNum(0), _fileName(nullptr) { _BuildMessageStream();  }
 jl::Error::Error(const Error &other) : _message(other._message), _lineNum(other._lineNum), _fileName(other._fileName) { _BuildMessageStream();  }
 jl::Error::Error(LPSTR Msg, int LineNum, LPSTR FileName) :

@@ -3,3 +3,8 @@
 *.vcxproj 
 *.vcxproj.vcxproj.filters 
 *.pdb 
+*.exp 
+*.exe 
+*.ilk 
+Testing/* 
+*.obj 

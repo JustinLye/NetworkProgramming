@@ -1,20 +1,39 @@
 #include"../include/Socket.h"
 
+#define SRVBUFSIZE 512
+#define SRVCMDIN stdin
+#define SRVCMD_EXIT "exit"
+#define SRVCMD_CONNECT "connect"
+#define SRVCMD_DISCONNECT "disconnect"
+#define SRVCMD_ERRORS "errors"
+
+void commandLoop(jl::ClientSocket *ss);
+
+
 int main(int argc, char* argv[]) {
 	struct addrinfo hints;
-	char input_buffer[DEFAULT_BUFFER_SIZE];
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
-	jl::ClientSocket client(hints, "127.0.0.1", "27011", 2, 2);
-	client.Connect();
-	client.Send("Client connected...");
-	do {
-		ZeroMemory(&input_buffer, DEFAULT_BUFFER_SIZE);
-		fgets(input_buffer, MAX_BUFFER_SIZE - 1, stdin);
-		client.Send(input_buffer);
-	} while (strncmp(input_buffer, "exit", strlen("exit")) != 0);
+	jl::SocketRequest sr;
+	sr.hints = hints;
+	sr.host = "127.0.0.1";
+	sr.port = "27123";
+	sr.majorVerion = 2;
+	sr.minorVersion = 2;
+	jl::ClientSocket client(sr);
+	commandLoop(&client);
 	std::cout << client.GetErrorLog() << std::endl;
 	return 0;
+}
+
+void commandLoop(jl::ClientSocket *ss) {
+	char buf[SRVBUFSIZE];
+
+	do {
+		fgets(buf, SRVBUFSIZE - 1, SRVCMDIN);
+		if (strncmp(buf, SRVCMD_ERRORS, strlen(SRVCMD_ERRORS)) == 0)
+			std::cout << ss->GetErrorLog() << std::endl;
+	} while (strncmp(buf, SRVCMD_EXIT, strlen(SRVCMD_EXIT)) != 0);
 }
