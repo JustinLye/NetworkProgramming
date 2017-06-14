@@ -57,7 +57,7 @@ int jl::ServerSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 		WSACleanup();
 		return result;
 	}
-	accptConnThd = std::thread(&ServerSocket::acceptingWorker, std::ref(*this));
+	accptConnThd = std::thread(&ServerSocket::acceptingManager, std::ref(*this));
 	clientMgrThd = std::thread(&ServerSocket::clientManager, std::ref(*this));
 
 	return 0;
@@ -98,10 +98,10 @@ int jl::ServerSocket::AcceptConnections() {
 void jl::ServerSocket::clientWorker(SOCKET clientSocket) {
 	int result;
 	char rBuffer[512];
-	ZeroMemory(&rBuffer, DEFAULT_BUFFER_SIZE);
+	ZeroMemory(&rBuffer, SOCKET_BUFFER_SIZE);
 
 	do {
-		result = recv(clientSocket, rBuffer, DEFAULT_BUFFER_SIZE, 0);
+		result = recv(clientSocket, rBuffer, SOCKET_BUFFER_SIZE, 0);
 		if (result < 0) {
 			std::unique_lock<std::mutex> locker(mu_ErrorLog);
 			errorLog.LogError(WSAGetLastError(), __LINE__ - 3, __FILE__);
@@ -127,8 +127,15 @@ void jl::ServerSocket::clientManager() {
 
 }
 
-void jl::ServerSocket::acceptingWorker() {
-	
+//This function runs on a separate thread that is initaized by ServerSocket::Initialize().
+//Loops while !shouldClose.
+//Waits on cond_acceptConn condition variable, predicated by acceptConn.
+//A call to ServerSocket::AcceptConnections wakes this thread.
+//Thread blocks on accept()
+//Logs error in case of accept() failure
+//Pushes newly created client socket to clientQueue deque
+//Notifies threads waiting on cond_newClient condition variable.
+void jl::ServerSocket::acceptingManager() {
 	SOCKET clientSocket = INVALID_SOCKET;
 	while (!shouldClose) {
 		std::unique_lock<std::mutex> locker(mu_listenSocket);
@@ -160,7 +167,7 @@ jl::ClientSocket::~ClientSocket() {
 	CloseSocket();
 }
 
-// Attempt to initialize Server Socket
+// Attempt to initialize Server Socket, Create Socket, Listen on Socket, Start clientManger and acceptingManager threads
 int jl::ClientSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 	int result;
 	WSADATA wsaData;
@@ -213,16 +220,16 @@ int jl::ClientSocket::CloseSocket() {
 }
 
 int jl::ClientSocket::Communicate() {
-	char pBuffer[DEFAULT_BUFFER_SIZE];
+	char pBuffer[SOCKET_BUFFER_SIZE];
 	int result = 0;
 	do {
 		std::cout << ">>> ";
-		fgets(pBuffer, DEFAULT_BUFFER_SIZE - 1, SRVCMDIN);
+		fgets(pBuffer, SOCKET_BUFFER_SIZE - 1, SRVCMDIN);
 		result = send(clientSocket, pBuffer, strlen(pBuffer), 0);
 		if (result == SOCKET_ERROR) {
 			errorLog.LogError(WSAGetLastError(), __LINE__ - 2, JL_FILENAME);
 			break;
 		}
-	} while (strncmp(pBuffer, SRVCMD_EXIT, strlen(SRVCMD_EXIT)) != 0);
+	} while (strncmp(pBuffer, CMD_EXIT, strlen(CMD_EXIT)) != 0);
 	return 0; 
 }

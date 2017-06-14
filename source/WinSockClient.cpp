@@ -2,9 +2,9 @@
 
 #define SRVBUFSIZE 512
 #define SRVCMDIN stdin
-#define SRVCMD_EXIT "exit"
-#define SRVCMD_CONNECT "connect"
-#define SRVCMD_DISCONNECT "disconnect"
+#define CMD_EXIT "exit"
+#define CMD_ACCEPT "connect"
+#define CMD_DISCONNECT "disconnect"
 #define SRVCMD_ERRORS "errors"
 
 void commandLoop(jl::ClientSocket *ss);
@@ -35,5 +35,5 @@ void commandLoop(jl::ClientSocket *ss) {
 		fgets(buf, SRVBUFSIZE - 1, SRVCMDIN);
 		if (strncmp(buf, SRVCMD_ERRORS, strlen(SRVCMD_ERRORS)) == 0)
 			std::cout << ss->GetErrorLog() << std::endl;
-	} while (strncmp(buf, SRVCMD_EXIT, strlen(SRVCMD_EXIT)) != 0);
+	} while (strncmp(buf, CMD_EXIT, strlen(CMD_EXIT)) != 0);
 }

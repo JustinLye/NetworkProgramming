@@ -2,68 +2,30 @@
 //Description: Self-Study of WinSock. Goal is to create Client, Server socket classes that can be compiled for Windows or Linux
 //For WinSock I using the tutorial found here: https://msdn.microsoft.com/en-us/library/windows/desktop/ms738545(v=vs.85).aspx
 
-#include<WinSock2.h>
-#include<WS2tcpip.h>
+
 #include<vector>
 #include<deque>
 #include<mutex>
 #include<thread>
 
-#pragma comment(lib, "Ws2_32.lib")
+
 #if !defined(__JL_SOCKET_HEADER__)
 #define __JL_SOCKET_HEADER__
-#include"ErrorLog.h"
+#include"SocketDefs.h"
 
-//modified solution taken from: https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
-#if !defined(JL_FILENAME)
-#include<string>
-#if defined(_WIN32)
-#define JL_FILENAME ((strrchr(__FILE__, '\\')) ? strrchr(__FILE__, '\\') + 1 : __FILE__)
-#elif defined(_UNIX)
-#define JL_FILENAME ((strrchr(__FILE__, '/')) ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#endif
-#endif
-#if !defined(DLLEXPORT)
-#define DLLEXPORT __declspec(dllexport)
-#endif
 
 namespace jl {
-#define DEFAULT_BUFFER_SIZE 512
-#define MAX_BUFFER_SIZE 2048
-#define SRVBUFSIZE 512
-#define SRVCMDIN stdin
-#define SRVCMD_EXIT "exit"
-#define SRVCMD_CONNECT "connect"
-#define SRVCMD_DISCONNECT "disconnect"
-
-
-	struct DLLEXPORT SocketRequest {
-		struct addrinfo hints;
-		PCSTR host;
-		PCSTR port;
-		BYTE majorVerion;
-		BYTE minorVersion;
-	};
-
-	class SocketFactory {
-	protected:
-		ErrorLog errorLog;
-	public:
-		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo) = 0;
-		DLLEXPORT virtual int CloseSocket() = 0;
-		DLLEXPORT inline const ErrorLog &GetErrorLog() const { return errorLog; }
-	};
 
 	class ServerSocket : public SocketFactory {
 	protected:
-		SOCKET listenSocket;
-		std::deque<SOCKET> clientQueue;
-		std::thread accptConnThd;
+		SOCKET listenSocket; // socket the server listens on
+		std::deque<SOCKET> clientQueue; // double-ended queue of accepted client sockets. queue is produced by clientManger() and consumed by acceptingManager()
+		std::thread accptConnThd; // thread initiated in Initialize() method. this thread accepts client connections for the server
 		std::thread clientMgrThd;
 		std::vector<std::thread> clientThreads;
 		bool acceptConn;
 		bool shouldClose;
-		DLLEXPORT virtual void acceptingWorker();
+		DLLEXPORT virtual void acceptingManager();
 		DLLEXPORT virtual void clientWorker(SOCKET clientSocket);
 		DLLEXPORT virtual void clientManager();
 		std::mutex mu_clientQueue;
@@ -77,7 +39,7 @@ namespace jl {
 		DLLEXPORT ServerSocket();
 		DLLEXPORT ServerSocket(const SocketRequest &SocketReqInfo);
 		DLLEXPORT ~ServerSocket();
-		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo);
+		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo); // Initializes WinSock, creates socket, listens on socket, starts clientManager and acceptingWorker threads
 		DLLEXPORT virtual int CloseSocket();
 		DLLEXPORT virtual int AcceptConnections();
 	};
