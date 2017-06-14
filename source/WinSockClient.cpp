@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 	sr.majorVerion = 2;
 	sr.minorVersion = 2;
 	jl::ClientSocket client(sr);
-	commandLoop(&client);
+	client.Communicate();
 	std::cout << client.GetErrorLog() << std::endl;
 	return 0;
 }

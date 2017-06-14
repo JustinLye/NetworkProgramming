@@ -1,10 +1,5 @@
 #include"../include/Socket.h"
 
-#define SRVBUFSIZE 512
-#define SRVCMDIN stdin
-#define SRVCMD_EXIT "exit"
-#define SRVCMD_CONNECT "connect"
-#define SRVCMD_DISCONNECT "disconnect"
 
 void commandLoop(jl::ServerSocket *ss);
 

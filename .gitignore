@@ -8,3 +8,11 @@
 *.ilk 
 Testing/* 
 *.obj 
+Debug/* 
+ErrorLog/* 
+Socket/* 
+WinSocketClient/* 
+WinSockServer/* 
+NetworkProgramming/* 
+NetworkProgrammig/* 
+WinSockClient/* 

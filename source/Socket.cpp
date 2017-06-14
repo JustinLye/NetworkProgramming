@@ -213,5 +213,16 @@ int jl::ClientSocket::CloseSocket() {
 }
 
 int jl::ClientSocket::Communicate() {
+	char pBuffer[DEFAULT_BUFFER_SIZE];
+	int result = 0;
+	do {
+		std::cout << ">>> ";
+		fgets(pBuffer, DEFAULT_BUFFER_SIZE - 1, SRVCMDIN);
+		result = send(clientSocket, pBuffer, strlen(pBuffer), 0);
+		if (result == SOCKET_ERROR) {
+			errorLog.LogError(WSAGetLastError(), __LINE__ - 2, JL_FILENAME);
+			break;
+		}
+	} while (strncmp(pBuffer, SRVCMD_EXIT, strlen(SRVCMD_EXIT)) != 0);
 	return 0; 
 }

@@ -30,6 +30,11 @@
 namespace jl {
 #define DEFAULT_BUFFER_SIZE 512
 #define MAX_BUFFER_SIZE 2048
+#define SRVBUFSIZE 512
+#define SRVCMDIN stdin
+#define SRVCMD_EXIT "exit"
+#define SRVCMD_CONNECT "connect"
+#define SRVCMD_DISCONNECT "disconnect"
 
 
 	struct DLLEXPORT SocketRequest {
