@@ -1,21 +1,8 @@
-//Created by: Justin Lye
-//Description: Self-Study of WinSock. Goal is to create Client, Server socket classes that can be compiled for Windows or Linux
-//For WinSock I using the tutorial found here: https://msdn.microsoft.com/en-us/library/windows/desktop/ms738545(v=vs.85).aspx
+#if !defined(__JL_SERVER_SOCKET_HEADER__)
+#define __JL_SERVER_SOCKET_HEADER__
 
-
-#include<vector>
-#include<deque>
-#include<mutex>
-#include<thread>
-
-
-#if !defined(__JL_SOCKET_HEADER__)
-#define __JL_SOCKET_HEADER__
 #include"SocketDefs.h"
-
-
 namespace jl {
-
 	class ServerSocket : public SocketFactory {
 	protected:
 		SOCKET listenSocket; // socket the server listens on
@@ -42,19 +29,6 @@ namespace jl {
 		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo); // Initializes WinSock, creates socket, listens on socket, starts clientManager and acceptingWorker threads
 		DLLEXPORT virtual int CloseSocket();
 		DLLEXPORT virtual int AcceptConnections();
-	};
-
-	class ClientSocket : public SocketFactory {
-	protected:
-		SOCKET clientSocket;
-
-	public:
-		DLLEXPORT ClientSocket();
-		DLLEXPORT ClientSocket(const SocketRequest &SocketReqInfo);
-		DLLEXPORT ~ClientSocket();
-		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo);
-		DLLEXPORT virtual int CloseSocket();
-		DLLEXPORT virtual int Communicate();
 	};
 };
 #endif

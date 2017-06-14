@@ -1,11 +1,16 @@
 #include<WinSock2.h>
 #include<WS2tcpip.h>
+#include<vector>
+#include<deque>
+#include<mutex>
+#include<thread>
+
 #pragma comment(lib, "Ws2_32.lib")
 #if !defined(__JL_SOCKET_DEFS_HEADER__)
 #define __JL_SOCKET_DEFS_HEADER__
 #include "ErrorLog.h"
 //modified solution taken from: https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
-#if !defined(JL_FILENAME) // JL_FILENAME removes the directory path from __FILE__ leaving just the file name
+#if !defined(JL_FILENAME) // JL_FILENAME r qqemoves the directory path from __FILE__ leaving just the file name
 #include<string>
 #if defined(_WIN32)
 #define JL_FILENAME ((strrchr(__FILE__, '\\')) ? strrchr(__FILE__, '\\') + 1 : __FILE__)
