@@ -1,9 +1,11 @@
+#include"SocketDefs.h"
+
 #if !defined(__JL_SERVER_SOCKET_HEADER__)
 #define __JL_SERVER_SOCKET_HEADER__
 
-#include"SocketDefs.h"
+
 namespace jl {
-	class ServerSocket : public SocketFactory {
+	class ServerSocket : public Socket {
 	protected:
 		SOCKET listenSocket; // socket the server listens on
 		std::deque<SOCKET> clientQueue; // double-ended queue of accepted client sockets. queue is produced by clientManger() and consumed by acceptingManager()

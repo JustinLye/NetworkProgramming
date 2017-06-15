@@ -97,11 +97,11 @@ int jl::ServerSocket::AcceptConnections() {
 
 void jl::ServerSocket::clientWorker(SOCKET clientSocket) {
 	int result;
-	char rBuffer[512];
-	ZeroMemory(&rBuffer, SOCKET_BUFFER_SIZE);
+	char rBuffer[BUFFER_SIZE];
+	ZeroMemory(&rBuffer, BUFFER_SIZE);
 
 	do {
-		result = recv(clientSocket, rBuffer, SOCKET_BUFFER_SIZE, 0);
+		result = recv(clientSocket, rBuffer, BUFFER_SIZE, 0);
 		if (result < 0) {
 			std::unique_lock<std::mutex> locker(mu_ErrorLog);
 			errorLog.LogError(WSAGetLastError(), __LINE__ - 3, __FILE__);

@@ -61,16 +61,17 @@ int jl::ClientSocket::CloseSocket() {
 }
 
 int jl::ClientSocket::Communicate() {
-	char pBuffer[SOCKET_BUFFER_SIZE];
+	// not probably need to handle buffer in a different way
+	char pBuffer[BUFFER_SIZE];
 	int result = 0;
 	do {
 		std::cout << ">>> ";
-		fgets(pBuffer, SOCKET_BUFFER_SIZE - 1, SRVCMDIN);
+		fgets(pBuffer, BUFFER_SIZE - 1, SRVCMDIN);
 		result = send(clientSocket, pBuffer, strlen(pBuffer), 0);
 		if (result == SOCKET_ERROR) {
 			errorLog.LogError(WSAGetLastError(), __LINE__ - 2, JL_FILENAME);
 			break;
 		}
-	} while (strncmp(pBuffer, CMD_EXIT, strlen(CMD_EXIT)) != 0);
+	} while (!ExitRequested(pBuffer));
 	return 0;
 }

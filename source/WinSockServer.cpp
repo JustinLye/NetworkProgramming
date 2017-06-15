@@ -1,4 +1,4 @@
-#include"../include/Socket.h"
+#include"../include/ServerSocket.h"
 
 
 void commandLoop(jl::ServerSocket *ss);
@@ -26,12 +26,11 @@ int main() {
 }
 
 void commandLoop(jl::ServerSocket *ss) {
-	char buf[SRVBUFSIZE];
-	
+	char buf[BUFFER_SIZE];
 	do {
-		fgets(buf, SRVBUFSIZE - 1, SRVCMDIN);
-		if (strncmp(buf, SRVCMD_CONNECT, strlen(SRVCMD_CONNECT)) == 0) {
+		fgets(buf, BUFFER_SIZE - 1, SRVCMDIN);
+		if (jl::Socket::StartAcceptingConnections(buf)) {
 			ss->AcceptConnections();
 		}
-	} while (strncmp(buf, SRVCMD_EXIT, strlen(SRVCMD_EXIT)) != 0);
+	} while (!jl::Socket::ExitRequested(buf));
 }

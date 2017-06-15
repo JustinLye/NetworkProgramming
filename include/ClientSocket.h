@@ -3,7 +3,7 @@
 #include"SocketDefs.h"
 
 namespace jl {
-	class ClientSocket : public SocketFactory {
+	class ClientSocket : public Socket {
 	protected:
 		SOCKET clientSocket;
 

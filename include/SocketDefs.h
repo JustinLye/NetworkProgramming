@@ -22,11 +22,17 @@
 #define DLLEXPORT __declspec(dllexport)
 #endif
 
-#define SOCKET_BUFFER_SIZE 512
 #define SRVCMDIN stdin
+#define BUFFER_SIZE 512
 #define CMD_EXIT "exit"
 #define CMD_ACCEPT "accept"
 #define CMD_DISCONNECT "disconnect"
+#define EXIT 0x1000
+#define ACCEPT 0x1001
+#define DISCONNECT 0x1002
+#define INVALID 0x1003
+
+
 namespace jl {
 	struct DLLEXPORT SocketRequest {
 		struct addrinfo hints;
@@ -35,13 +41,22 @@ namespace jl {
 		BYTE majorVerion;
 		BYTE minorVersion;
 	};
-	class SocketFactory {
+	class Socket {
 	protected:
 		ErrorLog errorLog;
 	public:
 		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo) = 0;
 		DLLEXPORT virtual int CloseSocket() = 0;
 		DLLEXPORT inline const ErrorLog &GetErrorLog() const { return errorLog; }
+		DLLEXPORT inline static bool ExitRequested(const char *pbuffer) {
+			if (pbuffer == nullptr || (int)strlen(pbuffer) > BUFFER_SIZE)
+				return false;
+			return (strncmp(pbuffer, CMD_EXIT, (int)strlen(CMD_EXIT)) == 0);
+		}
+		DLLEXPORT inline static bool StartAcceptingConnections(const char *pbuffer) {
+			return (strncmp(pbuffer, CMD_ACCEPT, (int)strlen(CMD_ACCEPT)) == 0);
+		}
+		
 	};
 };
 #endif
