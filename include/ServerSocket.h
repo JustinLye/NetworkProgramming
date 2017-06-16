@@ -11,7 +11,7 @@ namespace jl {
 		std::deque<SOCKET> clientQueue; // double-ended queue of accepted client sockets. queue is produced by clientManger() and consumed by acceptingManager()
 		std::thread accptConnThd; // thread initiated in Initialize() method. this thread accepts client connections for the server
 		std::thread clientMgrThd;
-		std::vector<std::thread> clientThreads;
+		std::vector<std::pair<SOCKET,std::thread>> clientThreads;
 		bool acceptConn;
 		bool shouldClose;
 		DLLEXPORT virtual void acceptingManager();
@@ -24,6 +24,8 @@ namespace jl {
 		std::mutex mu_AcceptConn;
 		std::condition_variable cond_acceptConn;
 		std::condition_variable cond_newClient;
+		UINT activeClients;
+
 	public:
 		DLLEXPORT ServerSocket();
 		DLLEXPORT ServerSocket(const SocketRequest &SocketReqInfo);

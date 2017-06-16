@@ -81,6 +81,13 @@ int jl::ServerSocket::CloseSocket() {
 		clientMgrThd.join();
 	}
 
+	for (int i = 0; i < clientThreads.size(); i++) {
+		closesocket(clientThreads[i].first);
+		if (clientThreads[i].second.joinable()) {
+			clientThreads[i].second.join();
+		}
+	}
+
 	return 0;
 }
 
@@ -99,19 +106,21 @@ void jl::ServerSocket::clientWorker(SOCKET clientSocket) {
 	int result;
 	char rBuffer[BUFFER_SIZE];
 	ZeroMemory(&rBuffer, BUFFER_SIZE);
-
-	do {
-		result = recv(clientSocket, rBuffer, BUFFER_SIZE, 0);
-		if (result < 0) {
-			std::unique_lock<std::mutex> locker(mu_ErrorLog);
-			errorLog.LogError(WSAGetLastError(), __LINE__ - 3, __FILE__);
-			std::cout << "Error occurred receiving from client...\n";
-			return;
-		} else if (result > 0) {
-			rBuffer[result] = '\0';
-			std::cout << rBuffer << std::endl;
-		}
-	} while (result != 0);
+	while (!shouldClose) {
+		do {
+			result = recv(clientSocket, rBuffer, BUFFER_SIZE, 0);
+			if (result < 0) {
+				std::unique_lock<std::mutex> locker(mu_ErrorLog);
+				errorLog.LogError(WSAGetLastError(), __LINE__ - 3, __FILE__);
+				std::cout << "Error occurred receiving from client...\n";
+				locker.unlock();
+				return;
+			} else if (result > 0) {
+				rBuffer[result] = '\0';
+				std::cout << rBuffer << std::endl;
+			}
+		} while (result != 0);
+	}
 }
 
 void jl::ServerSocket::clientManager() {
@@ -119,7 +128,7 @@ void jl::ServerSocket::clientManager() {
 		std::unique_lock<std::mutex> locker(mu_clientQueue);
 		cond_newClient.wait(locker, [&]() { return shouldClose || !clientQueue.empty(); });
 		if (!clientQueue.empty()) {
-			clientThreads.push_back(std::thread(&ServerSocket::clientWorker, std::ref(*this), clientQueue.back()));
+			clientThreads.push_back(std::pair<SOCKET, std::thread>(clientQueue.back(), std::thread(&ServerSocket::clientWorker, std::ref(*this), clientQueue.back())));
 			clientQueue.pop_back();
 		}
 		locker.unlock();
@@ -140,14 +149,13 @@ void jl::ServerSocket::acceptingManager() {
 	while (!shouldClose) {
 		std::unique_lock<std::mutex> locker(mu_listenSocket);
 		cond_acceptConn.wait(locker, [&]() { return acceptConn; });
+		
 		clientSocket = accept(listenSocket, NULL, NULL);
 		locker.unlock();
 		if (clientSocket == INVALID_SOCKET) {
-			std::unique_lock<std::mutex> errLocker(mu_ErrorLog);
-			std::unique_lock<std::mutex> lstLocker(mu_WSALastError);
+			std::unique_lock<std::mutex> locker2(mu_ErrorLog);
 			errorLog.LogError(WSAGetLastError(), __LINE__ - 4, JL_FILENAME);
-			lstLocker.unlock();
-			errLocker.unlock();
+			locker2.unlock();
 		} else {
 			std::unique_lock<std::mutex> clientLocker(mu_clientQueue);
 			clientQueue.push_front(clientSocket);

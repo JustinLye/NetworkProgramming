@@ -24,6 +24,7 @@
 
 #define SRVCMDIN stdin
 #define BUFFER_SIZE 512
+#define MAX_CLIENT_THREADS 10
 #define CMD_EXIT "exit"
 #define CMD_ACCEPT "accept"
 #define CMD_DISCONNECT "disconnect"
