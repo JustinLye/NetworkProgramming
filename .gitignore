@@ -21,3 +21,4 @@ Journal/*
 JournalTest/* 
 LogFile/* 
 LogFileTests/* 
+*.txt 

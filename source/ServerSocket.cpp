@@ -125,9 +125,15 @@ void jl::ServerSocket::clientWorker(const jl::ClientInfo& ci) {
 			} else if (result > 0) {
 				rBuffer[result] = '\0';
 				std::cout << rBuffer << std::endl;
+				std::ostringstream os;
+				os << "Packet received from client: " << ci << "\n\t" << rBuffer << "\n\t" << "Bytes: " << result;
+				log(__FUNCTION__, os);
 			}
 		} while (result != 0);
 	}
+	std::ostringstream os;
+	os << "Client disconnected\n\t" << ci;
+	log(__FUNCTION__, os);
 	shutdown(ci.clientSocket, SD_BOTH);
 	closesocket(ci.clientSocket);
 }
@@ -141,7 +147,7 @@ void jl::ServerSocket::clientManager() {
 		if (!clientQueue.empty()) {
 			clientThreads.push_back(std::pair<ClientInfo, std::thread>(clientQueue.back(), std::thread(&ServerSocket::clientWorker, std::ref(*this), clientQueue.back())));
 			std::ostringstream os;
-			os << "New client connection" << std::endl << clientQueue.back();
+			os << "New client connection\n\t" << clientQueue.back();
 			log(__FUNCTION__, os);
 			clientQueue.pop_back();
 		}

@@ -57,12 +57,8 @@ namespace jl {
 			addrlen(al) {}
 		friend std::ostream& operator<<(std::ostream& o, const ClientInfo& c) {
 			char str[INET_ADDRSTRLEN];
-			o << "Client Connected\nSocket: " << c.clientSocket << "\nAddress: \n";
-			o << "\tsin_family: " << c.addr.sin_family << std::endl;
-			o << "\tsin_port: " << c.addr.sin_port << std::endl;
 			inet_ntop(c.addr.sin_family, &(c.addr.sin_addr), str, INET_ADDRSTRLEN);
-			o << "\tin_addr: " << str  << std::endl;
-			o << "\tsin_zero: " << c.addr.sin_zero << std::endl;
+			o << str << ':' << c.addr.sin_port << '[' << c.clientSocket << ']';
 			return o;
 		}
 	};
