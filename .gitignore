@@ -19,3 +19,5 @@ WinSockClient/*
 *.exe 
 Journal/* 
 JournalTest/* 
+LogFile/* 
+LogFileTests/* 

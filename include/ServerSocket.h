@@ -25,7 +25,7 @@ namespace jl {
 		std::condition_variable cond_acceptConn;
 		std::condition_variable cond_newClient;
 		UINT activeClients;
-
+		LogFile log;
 	public:
 		DLLEXPORT ServerSocket();
 		DLLEXPORT ServerSocket(const SocketRequest &SocketReqInfo);

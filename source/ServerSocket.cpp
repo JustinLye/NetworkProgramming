@@ -7,6 +7,7 @@ jl::ServerSocket::ServerSocket(const jl::SocketRequest &SocketReqInfo) : listenS
 }
 jl::ServerSocket::~ServerSocket() {
 	CloseSocket();
+
 }
 
 
@@ -15,18 +16,22 @@ int jl::ServerSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 	int result;
 	WSADATA wsaData;
 	struct addrinfo *addrInfo = nullptr;
+	char *pBuffer = nullptr;
+	log.Open(SRV_LOGFILENAME);
+	log(__FUNCTION__, "New server session -- starting Initialization");
 
 	// Initialize WinSock
 	result = WSAStartup(MAKEWORD(SocketReqInfo.majorVerion, SocketReqInfo.minorVersion), &wsaData); // Call startup function
 	if (result != 0) { // Check if startup was successful
 		errorLog.LogError(result, __LINE__ - 2, JL_FILENAME);
+		log(__FUNCTION__, result);
 		return result;
 	}
-
 	// Resolve address and port
 	result = getaddrinfo(SocketReqInfo.host, SocketReqInfo.port, &SocketReqInfo.hints, &addrInfo);
 	if (result != 0) { // Check if address was successfully resolved
 		errorLog.LogError(result, __LINE__ - 2, JL_FILENAME);
+		log(__FUNCTION__, result);
 		WSACleanup();
 		return result;
 	}
@@ -35,6 +40,7 @@ int jl::ServerSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 	listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
 	if (listenSocket == INVALID_SOCKET) { // Check if listen socket is valid
 		errorLog.LogError(result = WSAGetLastError(), __LINE__ - 2, JL_FILENAME);
+		log(__FUNCTION__, result);
 		freeaddrinfo(addrInfo);
 		WSACleanup();
 		return result;
@@ -43,6 +49,7 @@ int jl::ServerSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 	result = bind(listenSocket, addrInfo->ai_addr, (int)addrInfo->ai_addrlen);
 	if (result == SOCKET_ERROR) {
 		errorLog.LogError(result = WSAGetLastError(), __LINE__ - 2, JL_FILENAME);
+		log(__FUNCTION__, result);
 		freeaddrinfo(addrInfo);
 		closesocket(listenSocket);
 		WSACleanup();
@@ -53,13 +60,14 @@ int jl::ServerSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 	// Listen on socket
 	if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
 		errorLog.LogError(result = WSAGetLastError(), __LINE__ - 1, JL_FILENAME);
+		log(__FUNCTION__, result);
 		closesocket(listenSocket);
 		WSACleanup();
 		return result;
 	}
 	accptConnThd = std::thread(&ServerSocket::acceptingManager, std::ref(*this));
 	clientMgrThd = std::thread(&ServerSocket::clientManager, std::ref(*this));
-
+	log(__FUNCTION__, "Initialization successfully completed");
 	return 0;
 }
 
@@ -87,15 +95,16 @@ int jl::ServerSocket::CloseSocket() {
 			clientThreads[i].second.join();
 		}
 	}
-
+	log(__FUNCTION__, "Closing server session");
+	log.Close();
 	return 0;
 }
 
 int jl::ServerSocket::AcceptConnections() {
 	std::unique_lock<std::mutex> locker(mu_AcceptConn);
 	if (!acceptConn) {
-		std::cout << "Server is now excepting connections...\n";
 		acceptConn = true;
+		log(__FUNCTION__, "Server is now excepting connections");
 	}
 	locker.unlock();
 	cond_acceptConn.notify_one();
@@ -106,15 +115,12 @@ void jl::ServerSocket::clientWorker(const jl::ClientInfo& ci) {
 	int result;
 	char rBuffer[BUFFER_SIZE];
 	ZeroMemory(&rBuffer, BUFFER_SIZE);
-	std::cout << "Connection successful\n" << ci << std::endl;
+
 	while (!shouldClose) {
 		do {
 			result = recv(ci.clientSocket, rBuffer, BUFFER_SIZE, 0);
 			if (result < 0) {
-				std::unique_lock<std::mutex> locker(mu_ErrorLog);
 				errorLog.LogError(WSAGetLastError(), __LINE__ - 3, __FILE__);
-				std::cout << "Error occurred receiving from client...\n";
-				locker.unlock();
 				return;
 			} else if (result > 0) {
 				rBuffer[result] = '\0';
@@ -124,7 +130,6 @@ void jl::ServerSocket::clientWorker(const jl::ClientInfo& ci) {
 	}
 	shutdown(ci.clientSocket, SD_BOTH);
 	closesocket(ci.clientSocket);
-
 }
 
 // This thread starts client worker threads
@@ -135,12 +140,16 @@ void jl::ServerSocket::clientManager() {
 		cond_newClient.wait(locker, [&]() { return shouldClose || !clientQueue.empty(); });
 		if (!clientQueue.empty()) {
 			clientThreads.push_back(std::pair<ClientInfo, std::thread>(clientQueue.back(), std::thread(&ServerSocket::clientWorker, std::ref(*this), clientQueue.back())));
+			std::ostringstream os;
+			os << "New client connection" << std::endl << clientQueue.back();
+			log(__FUNCTION__, os);
 			clientQueue.pop_back();
 		}
 		locker.unlock();
 	}
 
 }
+
 
 //This function runs on a separate thread that is initaized by ServerSocket::Initialize().
 //Loops while !shouldClose.
