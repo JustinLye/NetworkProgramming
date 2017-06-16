@@ -66,7 +66,7 @@ int jl::ServerSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 int jl::ServerSocket::CloseSocket() {
 	// will need code to close down any client sockets
 	shouldClose = true;
-	closesocket(listenSocket); // this will also close
+	closesocket(listenSocket); 
 	WSACleanup();
 	if (accptConnThd.joinable()) {
 		std::unique_lock<std::mutex> locker(mu_AcceptConn);
@@ -82,7 +82,7 @@ int jl::ServerSocket::CloseSocket() {
 	}
 
 	for (int i = 0; i < clientThreads.size(); i++) {
-		closesocket(clientThreads[i].first);
+		closesocket(clientThreads[i].first.clientSocket);
 		if (clientThreads[i].second.joinable()) {
 			clientThreads[i].second.join();
 		}
@@ -102,13 +102,14 @@ int jl::ServerSocket::AcceptConnections() {
 	return 0;
 }
 
-void jl::ServerSocket::clientWorker(SOCKET clientSocket) {
+void jl::ServerSocket::clientWorker(const jl::ClientInfo& ci) {
 	int result;
 	char rBuffer[BUFFER_SIZE];
 	ZeroMemory(&rBuffer, BUFFER_SIZE);
+	std::cout << "Connection successful\n" << ci << std::endl;
 	while (!shouldClose) {
 		do {
-			result = recv(clientSocket, rBuffer, BUFFER_SIZE, 0);
+			result = recv(ci.clientSocket, rBuffer, BUFFER_SIZE, 0);
 			if (result < 0) {
 				std::unique_lock<std::mutex> locker(mu_ErrorLog);
 				errorLog.LogError(WSAGetLastError(), __LINE__ - 3, __FILE__);
@@ -121,14 +122,19 @@ void jl::ServerSocket::clientWorker(SOCKET clientSocket) {
 			}
 		} while (result != 0);
 	}
+	shutdown(ci.clientSocket, SD_BOTH);
+	closesocket(ci.clientSocket);
+
 }
 
+// This thread starts client worker threads
+// Sleeps on cond_newClient condition variable
 void jl::ServerSocket::clientManager() {
 	while (!shouldClose) {
 		std::unique_lock<std::mutex> locker(mu_clientQueue);
 		cond_newClient.wait(locker, [&]() { return shouldClose || !clientQueue.empty(); });
 		if (!clientQueue.empty()) {
-			clientThreads.push_back(std::pair<SOCKET, std::thread>(clientQueue.back(), std::thread(&ServerSocket::clientWorker, std::ref(*this), clientQueue.back())));
+			clientThreads.push_back(std::pair<ClientInfo, std::thread>(clientQueue.back(), std::thread(&ServerSocket::clientWorker, std::ref(*this), clientQueue.back())));
 			clientQueue.pop_back();
 		}
 		locker.unlock();
@@ -146,11 +152,12 @@ void jl::ServerSocket::clientManager() {
 //Notifies threads waiting on cond_newClient condition variable.
 void jl::ServerSocket::acceptingManager() {
 	SOCKET clientSocket = INVALID_SOCKET;
+	struct sockaddr_in addr;
+	int addrlen = sizeof(addr);
 	while (!shouldClose) {
 		std::unique_lock<std::mutex> locker(mu_listenSocket);
 		cond_acceptConn.wait(locker, [&]() { return acceptConn; });
-		
-		clientSocket = accept(listenSocket, NULL, NULL);
+		clientSocket = accept(listenSocket, (struct sockaddr*)&addr, &addrlen);
 		locker.unlock();
 		if (clientSocket == INVALID_SOCKET) {
 			std::unique_lock<std::mutex> locker2(mu_ErrorLog);
@@ -158,7 +165,7 @@ void jl::ServerSocket::acceptingManager() {
 			locker2.unlock();
 		} else {
 			std::unique_lock<std::mutex> clientLocker(mu_clientQueue);
-			clientQueue.push_front(clientSocket);
+			clientQueue.push_front(ClientInfo(clientSocket, addr, addrlen));
 			clientLocker.unlock();
 			cond_newClient.notify_one();
 		}

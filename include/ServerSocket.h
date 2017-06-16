@@ -8,14 +8,14 @@ namespace jl {
 	class ServerSocket : public Socket {
 	protected:
 		SOCKET listenSocket; // socket the server listens on
-		std::deque<SOCKET> clientQueue; // double-ended queue of accepted client sockets. queue is produced by clientManger() and consumed by acceptingManager()
+		std::deque<ClientInfo> clientQueue; // double-ended queue of accepted client sockets. queue is produced by clientManger() and consumed by acceptingManager()
 		std::thread accptConnThd; // thread initiated in Initialize() method. this thread accepts client connections for the server
 		std::thread clientMgrThd;
-		std::vector<std::pair<SOCKET,std::thread>> clientThreads;
+		std::vector<std::pair<ClientInfo,std::thread>> clientThreads;
 		bool acceptConn;
 		bool shouldClose;
 		DLLEXPORT virtual void acceptingManager();
-		DLLEXPORT virtual void clientWorker(SOCKET clientSocket);
+		DLLEXPORT virtual void clientWorker(const ClientInfo& ci);
 		DLLEXPORT virtual void clientManager();
 		std::mutex mu_clientQueue;
 		std::mutex mu_listenSocket;

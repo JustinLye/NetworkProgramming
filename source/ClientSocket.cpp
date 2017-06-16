@@ -73,5 +73,6 @@ int jl::ClientSocket::Communicate() {
 			break;
 		}
 	} while (!ExitRequested(pBuffer));
+	closesocket(clientSocket);
 	return 0;
 }

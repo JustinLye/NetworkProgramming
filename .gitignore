@@ -4,7 +4,7 @@
 *.vcxproj.vcxproj.filters 
 *.pdb 
 *.exp 
-*.exe 
+ 
 *.ilk 
 Testing/* 
 *.obj 
@@ -16,3 +16,6 @@ WinSockServer/*
 NetworkProgramming/* 
 NetworkProgrammig/* 
 WinSockClient/* 
+*.exe 
+Journal/* 
+JournalTest/* 

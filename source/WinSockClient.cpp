@@ -8,8 +8,8 @@ int main(int argc, char* argv[]) {
 	hints.ai_protocol = IPPROTO_TCP;
 	jl::SocketRequest sr;
 	sr.hints = hints;
-	sr.host = "127.0.0.1";
-	sr.port = "27123";
+	sr.host = (argc >= 2) ? argv[1] : "127.0.0.1";
+	sr.port = (argc >= 3) ? argv[2] : "27123";
 	sr.majorVerion = 2;
 	sr.minorVersion = 2;
 	jl::ClientSocket client(sr);
