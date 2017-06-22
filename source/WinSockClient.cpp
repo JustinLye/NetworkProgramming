@@ -14,6 +14,5 @@ int main(int argc, char* argv[]) {
 	sr.minorVersion = 2;
 	jl::ClientSocket client(sr);
 	client.Communicate();
-	std::cout << client.GetErrorLog() << std::endl;
 	return 0;
 }

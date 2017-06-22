@@ -31,7 +31,7 @@
 #define CMD_ACCEPT "accept"
 #define CMD_DISCONNECT "disconnect"
 #define CMD_JRNL "journal"
-#define SRV_LOGFILENAME "WinSockServer_logfile.txt"
+#define SRV_LOGFILENAME "WinSock_server.log"
 #define EXIT 0x1000
 #define ACCEPT 0x1001
 #define DISCONNECT 0x1002
@@ -63,12 +63,10 @@ namespace jl {
 		}
 	};
 	class Socket {
-	protected:
-		ErrorLog errorLog;
 	public:
-		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo) = 0;
+
+		DLLEXPORT virtual int Initialize(const struct SocketRequest &SocketReqInfo) = 0;
 		DLLEXPORT virtual int CloseSocket() = 0;
-		DLLEXPORT inline const ErrorLog &GetErrorLog() const { return errorLog; }
 		DLLEXPORT inline static bool ExitRequested(const char *pbuffer) {
 			if (pbuffer == nullptr || (int)strlen(pbuffer) > BUFFER_SIZE)
 				return false;
@@ -91,11 +89,11 @@ namespace jl {
 		
 	};
 
-	class ServerLogFile : public LogFile {
+	class ServerLogFile : public Log_file {
 	public:
-		DLLEXPORT ServerLogFile() : LogFile() {}
+		DLLEXPORT ServerLogFile() : Log_file(SRV_LOGFILENAME) {}
 		ServerLogFile(const ServerLogFile&) = delete;
-		DLLEXPORT virtual void LogMessage(const struct LogMsg& Msg) { logMessage(Msg.source, Msg.msg); }
+		DLLEXPORT virtual void LogMessage(const struct LogMsg& Msg) { log_message(Msg.source, Msg.msg); }
 
 	};
 

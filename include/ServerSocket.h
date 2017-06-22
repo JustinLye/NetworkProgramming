@@ -25,12 +25,12 @@ namespace jl {
 		std::condition_variable cond_acceptConn;
 		std::condition_variable cond_newClient;
 		UINT activeClients;
-		LogFile log;
+		Log_file Log;
 	public:
-		DLLEXPORT ServerSocket();
-		DLLEXPORT ServerSocket(const SocketRequest &SocketReqInfo);
+		DLLEXPORT ServerSocket(const char* Log_filename = SRV_LOGFILENAME);
+		DLLEXPORT ServerSocket(const struct SocketRequest& SocketReqInfo, const char* Log_filename = SRV_LOGFILENAME);
 		DLLEXPORT ~ServerSocket();
-		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo); // Initializes WinSock, creates socket, listens on socket, starts clientManager and acceptingWorker threads
+		DLLEXPORT virtual int Initialize(const struct SocketRequest& SocketReqInfo);
 		DLLEXPORT virtual int CloseSocket();
 		DLLEXPORT virtual int AcceptConnections();
 	};

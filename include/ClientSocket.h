@@ -6,10 +6,10 @@ namespace jl {
 	class ClientSocket : public Socket {
 	protected:
 		SOCKET clientSocket;
-
+		Log_file Log;
 	public:
-		DLLEXPORT ClientSocket();
-		DLLEXPORT ClientSocket(const SocketRequest &SocketReqInfo);
+		DLLEXPORT ClientSocket(const char* Log_filename = "WinSock_client.log");
+		DLLEXPORT ClientSocket(const SocketRequest &SocketReqInfo, const char* Log_filename = "WinSock_client.log");
 		DLLEXPORT ~ClientSocket();
 		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo);
 		DLLEXPORT virtual int CloseSocket();

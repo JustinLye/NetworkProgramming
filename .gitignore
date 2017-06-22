@@ -22,3 +22,5 @@ JournalTest/*
 LogFile/* 
 LogFileTests/* 
 *.txt 
+Exception_message/* 
+WinProc/* 

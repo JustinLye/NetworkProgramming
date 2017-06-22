@@ -9,9 +9,6 @@
 #include<Windows.h>
 #define MSG_DIV "----------------------------------------------------"
 #define MSG_DIV2 "*******************************************************************************************************"
-#define MSG_OPENFAIL  "Error: Log file open attempt failed."
-#define MSG_CLOSEFAIL "Error: Log file close attempt failed."
-#define MSG_LOGFAIL_UNOPENED_FILE "Error: Log message attempt failed because log file is not open."
 #define MSG_NEWLOGGING_SESSION "NEW LOGGING SESSION STARTED"
 #define MSG_CLOSELOGGIN_SESSION "CLOSING LOGGING SESSION"
 #if !defined(DLLEXPORT)
@@ -27,36 +24,15 @@
 #endif
 
 namespace jl {
-	class LogFile {
+	class Log_file {
 	public:
-		DLLEXPORT LogFile();
-		LogFile(const LogFile&) = delete;
-		DLLEXPORT ~LogFile();
-		DLLEXPORT virtual void Open(const char* fileName);
-		DLLEXPORT virtual void Close();
-		DLLEXPORT virtual LogFile& operator()(const char* source, const char* msg) { logMessage(source, msg); return *this; }
-		DLLEXPORT virtual LogFile& operator()(const char *source, int errorCode) {
-			char *pBuffer = nullptr;
-			GET_SYSTEM_ERROR(errorCode, pBuffer);
-			logMessage(source, pBuffer);
-			return *this;
-		}
-		DLLEXPORT virtual LogFile& operator()(const char *source, const std::string& str) {
-			logMessage(source, str.c_str());
-			return *this;
-		}
-		DLLEXPORT virtual LogFile& operator()(const char *source, const std::ostringstream& os) {
-			logMessage(source, os.str().c_str());
-			return *this;
-		}
-		DLLEXPORT virtual void LogMessage(const char* source, const char* msg) { logMessage(source, msg); }
+		DLLEXPORT Log_file(const char* File_name);
+		Log_file(const Log_file&) = delete;
+		DLLEXPORT ~Log_file();
+		DLLEXPORT virtual void log_message(const char* Message_source, const char* Message);
+		DLLEXPORT virtual void log_message(const char* Message_source, const int& MS_error_code);
 	protected:
-		DLLEXPORT virtual void logMessage(const char* source, const char* msg);
-		DLLEXPORT virtual void openLogMessage();
-		DLLEXPORT virtual void closeLogMessage();
-		std::mutex mu_write;
+		std::mutex Append_mutx;
 		std::ofstream log;
-		struct std::tm logTime;
-		std::time_t tTime;
 	};
 };

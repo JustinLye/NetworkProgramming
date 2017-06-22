@@ -1,6 +1,5 @@
 #include"../include/ServerSocket.h"
 
-
 void commandLoop(jl::ServerSocket *ss);
 
 int main(int argc, char* argv[]) {
@@ -20,7 +19,6 @@ int main(int argc, char* argv[]) {
 
 	jl::ServerSocket ss(sr);
 	commandLoop(&ss);
-	std::cout << ss.GetErrorLog() << std::endl;
 
 	return 0;
 }

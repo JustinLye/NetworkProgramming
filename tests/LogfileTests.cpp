@@ -2,26 +2,26 @@
 #include"../include/LogFile.h"
 
 TEST(LogFile, LogFileTesting) {
-	jl::LogFile lf;
+	jl::Log_file lf;
 	lf.Open("Test logfile.txt");
 	lf.LogMessage("LogFileTesting", "This is a logfile test");
 	lf.Close();
 }
 
 TEST(LogFile, LogFileOperator) {
-	jl::LogFile lf;
+	jl::Log_file lf;
 	lf.Open("Test logfile3.txt");
 	lf("LogFile Testing", "This is a test of the operator()");
 	lf.Close();
 }
 
 TEST(LogFile, LogFileSysError) {
-	jl::LogFile lf;
+	jl::Log_file lf;
 	lf.Open("Test logfile4.txt");
 	lf("LogFile Testing", 10041);
 	lf.Close();
 }
-jl::LogFile logfile;
+jl::Log_file logfile;
 void threadTest(const char* source) {
 	std::ostringstream s;
 	for (int i = 0; i < 100; i++) {
