@@ -28,7 +28,7 @@ void commandLoop(jl::ServerSocket *ss) {
 	do {
 		fgets(buf, BUFFER_SIZE - 1, SRVCMDIN);
 		if (jl::Socket::StartAcceptingConnections(buf)) {
-			ss->AcceptConnections();
+			ss->accept_connections();
 		}
 	} while (!jl::Socket::ExitRequested(buf));
 }

@@ -65,8 +65,8 @@ namespace jl {
 	class Socket {
 	public:
 
-		DLLEXPORT virtual int Initialize(const struct SocketRequest &SocketReqInfo) = 0;
-		DLLEXPORT virtual int CloseSocket() = 0;
+		DLLEXPORT virtual int initialize(const struct SocketRequest &SocketReqInfo) = 0;
+		DLLEXPORT virtual int close_socket() = 0;
 		DLLEXPORT inline static bool ExitRequested(const char *pbuffer) {
 			if (pbuffer == nullptr || (int)strlen(pbuffer) > BUFFER_SIZE)
 				return false;

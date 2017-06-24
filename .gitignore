@@ -24,3 +24,5 @@ LogFileTests/*
 *.txt 
 Exception_message/* 
 WinProc/* 
+Message/* 
+*.log 

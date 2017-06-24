@@ -11,8 +11,8 @@ namespace jl {
 		DLLEXPORT ClientSocket(const char* Log_filename = "WinSock_client.log");
 		DLLEXPORT ClientSocket(const SocketRequest &SocketReqInfo, const char* Log_filename = "WinSock_client.log");
 		DLLEXPORT ~ClientSocket();
-		DLLEXPORT virtual int Initialize(const SocketRequest &SocketReqInfo);
-		DLLEXPORT virtual int CloseSocket();
+		DLLEXPORT virtual int initialize(const SocketRequest &SocketReqInfo);
+		DLLEXPORT virtual int close_socket();
 		DLLEXPORT virtual int Communicate();
 	};
 };

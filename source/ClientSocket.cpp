@@ -11,14 +11,14 @@ jl::ClientSocket::ClientSocket(const SocketRequest &SocketReqInfo, const char* L
 	Log(Log_filename),
 	clientSocket(INVALID_SOCKET)
 {
-	Initialize(SocketReqInfo);
+	initialize(SocketReqInfo);
 }
 jl::ClientSocket::~ClientSocket() {
-	CloseSocket();
+	close_socket();
 }
 
 // Attempt to initialize Server Socket, Create Socket, Listen on Socket, Start clientManger and acceptingManager threads
-int jl::ClientSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
+int jl::ClientSocket::initialize(const jl::SocketRequest &SocketReqInfo) {
 	int result;
 	WSADATA wsaData;
 	struct addrinfo *addrInfo = nullptr;
@@ -63,7 +63,7 @@ int jl::ClientSocket::Initialize(const jl::SocketRequest &SocketReqInfo) {
 	return 0;
 }
 
-int jl::ClientSocket::CloseSocket() {
+int jl::ClientSocket::close_socket() {
 	closesocket(clientSocket);
 	WSACleanup();
 	return 0;
