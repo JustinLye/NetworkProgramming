@@ -12,7 +12,7 @@
 //modified solution taken from: https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
 #if !defined(JL_FILENAME) // JL_FILENAME r qqemoves the directory path from __FILE__ leaving just the file name
 #include<string>
-#if defined(_WIN32)
+#if defined(WIN32)
 #define JL_FILENAME ((strrchr(__FILE__, '\\')) ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 #elif defined(_UNIX)
 #define JL_FILENAME ((strrchr(__FILE__, '/')) ? strrchr(__FILE__, '/') + 1 : __FILE__)
@@ -36,6 +36,7 @@
 #define ACCEPT 0x1001
 #define DISCONNECT 0x1002
 #define INVALID 0x1003
+#if defined(_WIN32) || defined(FormatMessage)
 #if !defined(GET_SYSTEM_ERROR)
 #define GET_SYSTEM_ERROR(errorCode, pBuffer) FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, errorCode, 0, (LPSTR)&pBuffer, 0, nullptr)
 #endif

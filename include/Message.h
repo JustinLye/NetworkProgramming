@@ -1,8 +1,10 @@
 #include<iostream>
 #include<iomanip>
-#include<Windows.h>
+
 #if !defined(__JL_MESSAGE_HEADER__)
 #define __JL_MESSAGE_HEADER__
+
+
 #if !defined(DLLEXPORT)
 #if defined(MAKEDLL)
 #define DLLEXPORT __declspec(dllexport)
@@ -10,8 +12,20 @@
 #define DLLEXPORT __declspec(dllimport)
 #endif
 #endif
+
+// Macro for windows system error codes
 #if !defined(GET_SYSTEM_ERROR)
+#if defined(_WIN32)
+#if !defined(FormatMessage)
+#include<Windows.h>
+#endif //inlcude Windows.h
+#if defined(FormatMessage)
 #define GET_SYSTEM_ERROR(errorCode, pBuffer) FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, errorCode, 0, (LPSTR)&pBuffer, 0, nullptr)
+#endif //windows FormatMessage
+#elif defined(_UNIX)
+#include<errno.h>
+#define GET_SYSTEM_ERROR(Error_code, Buffer) strerror_r(Error_code, Buffer, 512)
+#endif
 #endif
 
 namespace jl {

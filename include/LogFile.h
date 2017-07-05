@@ -25,10 +25,11 @@
 #define DLLEXPORT __declspec(dllimport)
 #endif
 #endif
-#if !defined(GET_SYSTEM_ERROR)
+#if defined(WIN32) || defined(WIN64)
+#if !defined(GET_SYSTEM_ERROR) && defined(FormatMessage)
 #define GET_SYSTEM_ERROR(errorCode, pBuffer) FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, errorCode, 0, (LPSTR)&pBuffer, 0, nullptr)
 #endif
-
+#endif
 #if !defined(MESSAGE_SOURCE)
 #define MESSAGE_SOURCE jl::Message_source(JL_FILENAME, __FUNCTION__, __LINE__)
 #endif
